@@ -1,6 +1,13 @@
 
 # Symbolic system for Qauntum computing
 
+### Install
+
+To install, type `]` in a julia (>=1.5) REPL and then input
+```julia pkg
+pkg> add https://github.com/overshiki/SymbolicCircuit.jl
+```
+
 ### What does `SymbolicCircuit.jl` provide?
 
 `SymbolicCircuit.jl` provides a symbolic system for representation of Quantum circuit, in which, one can manipulate Quantum circuit using term rewriting & equality saturation techniques. Using this package, one can easily define any syntactic rules of Quantum circuit(for example, mutation between two quantum gates), and apply it to term rewriting and equality saturation Modules provided by[ `Metatheory.jl` ](https://github.com/JuliaSymbolics/Metatheory.jl)(Yes, This project is highly dependent on and highly motivated by [`Metatheory.jl`](https://github.com/JuliaSymbolics/Metatheory.jl)). Doing so, tasks such as circuit simplification, equivalence detection, code generation become easily achievable.
