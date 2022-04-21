@@ -8,28 +8,28 @@
 ### What is the symbolic system of `SymbolicCircuit.jl`
 #### Quantum gates
 In `SymbolicCircuit.jl`, Qauntum gate are expressed by the instance of `Gate` struct, for example, the Pauli X gate on 1st Qubit is defined by
-```
+```julia
 using SymbolicCircuit
 x1 = Gate(gX(), [Loc(1), ])
 ```
 Where `gX()` represents the type of Pauli X, `Loc(1)` represents the gate is applied on Qubit 1.
 We can also define multi-Qubit gate, for example, CNOT gate on 1st Qubit and controlled by 2nd Qubit
-```
+```julia
 cnot_1c2 = Gate(gX(), [Loc(1), cLoc(2)])
 ```
 Where `cLoc(2)` indicates the gate is controlled by 2nd Qubit
 
 We can also define parametric gate such as rotate X, controlled by parameter `:theta`
-```
+```julia
 rx = Gate(rX([:theta, ]), [Loc(3), ])
 ```
 Since the simplifying many VQE circuits will often result in rotate gate controlled by multiple parameters(sum of multiple rotate angles), we also allow this
-```
+```julia
 rx2 = Gate(rX([:theta1, :theta2, :theta3]), [Loc(3), ])
 ```
 #### Quantum circuit
 It is wellknown that, symbolically, Qauntum circuit is just a chain of quantum gate, applied from left to the right. In `SymbolicCircuit.jl`, we define Quantum circuit as expression of gates connected by `*` operator. 
-```
+```julia
 using SymbolicCircuit
 x1 = Gate(gX(), [Loc(1), ])
 h2 = Gate(gH(), [Loc(2), ])
@@ -37,7 +37,7 @@ y3 = Gate(gY(), [Loc(3), ])
 circ = head_circuit() * x1 * x1 * h2 * y3 * x1 * x1 * h2
 ```
 This allows flexible ways of define a circuit, for example, we can also
-```
+```julia
 using SymbolicCircuit
 let circ = head_circuit()
     for _ in 1:2
@@ -49,7 +49,7 @@ end
 ```
 #### Syntactic rules
 The core idea of `SymbolicCircuit.jl` is that Quantum circuit can be represented using symbolic expression and some rules(such as mutation rules) can be represented using syntactic rules. Then term rewriting & equality saturation system could be used to manipulate the circuit. In `SymbolicCircuit.jl`, we provide easy ways to define different type of syntactic rules one may imagined. For example, a simple commute rules and cancel rules can be defined
-```
+```julia
 using SymbolicCircuit
 using Metatheory
 
@@ -74,7 +74,7 @@ Addtionally, `SymbolicCircuit.jl` also provides some built-in rules for applicat
 
 #### Term rewriting & Equality saturation
 The core operation of `SymbolicCircuit.jl` is to apply a variaty of syntactic rules to term rewriting & equality saturation system provided by `Metatheory.jl`, which allows powerful circuit manipulate functions. For example, term rewriting could be used to transform all Pauli Z gates in a circuit into `H X H` following rewriting rule `Z=HXH`. This could be easily handled using `SymbolicCircuit.jl`
-```
+```julia
 using SymbolicCircuit
 using SymbolicCircuit: is_Z, is_commute, is_cancel
 using Metatheory
@@ -99,7 +99,7 @@ r = Postwalk(PassThrough(r))
 ```
 Of course, this is just a simple rewriting rule, and could be done using any non-symbolic systems such as direct coding in qisik|Yao.jl|mindquantum|...(for example, in mindquantum, circuits are represented as object of List class in python, such manipulation could be easily done using pop and insert operations). The full power of `SymbolicCircuit.jl` comes from the qquality saturation techniques in symbolic & compiler community. In equality saturation(Eqsat), the term rewriting are allowed to be handled without an order. For example, bidirectional rules such as gate commute rule `a*b==b*a` are allowed. The key point of Eqsat is that it allows all combination of rewriting operations to be stored in memory(usually in efficient EGraph data structure as implemented in `Metatheory.jl`), and efficiently traversed. Thus one could set the search goal to search for specific expressions in all equivalent expressions resulted from the rewriting rules, which would be a complex task for non-symbolic systems without Eqsat techniques, such as qisik|Yao.jl|mindquantum|...
 To demonstrate, let's consider circuit simplification operation. We consider only a combination of commute rule `a*b==b*a where a, b commute` and cancel rule `a*b->0 where a, b could be cancelled`. These simple rules already provide a strategy to simplify a circuit, i.e. for any pair of gates in a circuit, commute if possible, cancel if possible, and then try more commutation and cancellation, until no progress could be made. In a non-symbolic system without Eqsat, such strategy could only be implemented using a heuristic approach without a saturation guarantee(or it could have saturation guarantee but need a lot of codings). In `SymbolicCircuit.jl` it would be easily achiveable and has a guarantee that all possible combination are traversed.
-```
+```julia
 using SymbolicCircuit
 using Metatheory
 using Metatheory.Library: @right_associative, @left_associative
@@ -126,16 +126,16 @@ circ = head_circuit() * x1 * x1 * h2 * y3 * x1 * x1 * h2
 ncirc = simplify(circ)
 ```
 result:
-```
+```julia
 Gate(gY(), Q[Loc(3)])
 ```
 
 Another powerful function provided by the system is that, it allows to detect if two circuit are in equvilent in certain rules. For example, continue from the above circuit simplification task, just do
-```
+```julia
 areequal(v, circ, ncirc)
 ```
 result:
-```
+```julia
 true
 ```
 will tell if `circ` and `ncirc` are in equivalent under the rules `v`.
@@ -146,12 +146,12 @@ For those want to use `SymbolicCircuit.jl` as openbox toolset for some practical
 The list of the functions are:
 
 `egraph_simplify`: circuit simplification using default set of rules
-```
+```julia
 circ = head_circuit() * x1 * x1 * h2 * y3 * x1 * x1 * h2
 circ = egraph_simplify(circ, _simplify; verbose=false)
 ```
 `areequal`: overload of `areequal` function in `Metatheory.jl`, using default set of rules
-```
+```julia
 areequal(circ1, circ2, circ3)
 ```
 
