@@ -44,6 +44,10 @@ function get_length(::One)
     return 0
 end
 
+function get_length(::Gate)
+    return 1
+end
+
 function get_length(circuit::Expr)
     gates = []
     postwalk(circuit) do x 

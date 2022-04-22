@@ -1,4 +1,3 @@
-using Metatheory
 using SymbolicCircuit
 using SymbolicCircuit: is_AAdagger
 
@@ -22,9 +21,13 @@ rxnd = Gate(rXd([:theta2, :theta1]), Q[Loc(3)])
 
 circ = x1 * z2 * cnot_4c2 * z2 * y3 * z3 * x1 * s3 * s3 * rx1 * rx2 * h2
 
+
 ncirc = egraph_simplify(circ, Val(:default_rule))
 @show ncirc
+@show SymbolicCircuit.areequal(Val(:default_rule), circ, ncirc)
+
 
 circ = circ * dagger_circuit(circ)
 ncirc = egraph_simplify(circ, Val(:default_rule))
 @show ncirc
+@show SymbolicCircuit.areequal(Val(:default_rule), circ, ncirc)

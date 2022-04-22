@@ -70,7 +70,21 @@ end
 circ = x1 * x1 * h2 * y3 * x1 * x1 * h2
 ncirc = simplify(circ)
 
-areequal(v, circ, ncirc)
+@show areequal(v, circ, ncirc)
+# @show SymbolicCircuit.areequal(Val(:default_rule), circ, ncirc)
 
 circ = x1 * x1 * h2 * y3 * x1 * x1 * h2
 circ = egraph_simplify(circ, Val(:default_rule); verbose=false)
+
+
+using SymbolicCircuit
+x1 = Gate(gX(), [Loc(1), ])
+h2 = Gate(gH(), [Loc(2), ])
+y3 = Gate(gY(), [Loc(3), ])
+circ = x1 * x1 * h2 * y3 * x1 * x1 * h2
+ncirc = egraph_simplify(circ, Val(:default_rule))
+# ncirc *= One()
+@show circ
+@show ncirc
+
+SymbolicCircuit.areequal(Val(:default_rule), circ, ncirc)

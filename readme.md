@@ -8,6 +8,24 @@ To install, type `]` in a julia (>=1.5) REPL and then input
 pkg> add https://github.com/overshiki/SymbolicCircuit.jl
 ```
 
+### Quick start
+To define and simplify a quantum circuit, just do
+```julia
+using SymbolicCircuit
+x1 = Gate(gX(), [Loc(1), ])
+h2 = Gate(gH(), [Loc(2), ])
+y3 = Gate(gY(), [Loc(3), ])
+circ = x1 * x1 * h2 * y3 * x1 * x1 * h2
+ncirc = egraph_simplify(circ, Val(:default_rule))
+```
+It will simplify `circ` into `ncirc` according to commute and cancel rules. 
+
+To test if two circuit are in equivalent according to commute and cancel rules, just do
+```julia
+SymbolicCircuit.areequal(Val(:default_rule), circ, ncirc)
+```
+It will return `true` if `circ` and `ncirc` are in equivalent, otherwise `missing`.
+
 ### What does `SymbolicCircuit.jl` provide?
 
 `SymbolicCircuit.jl` provides a symbolic system for representation of Quantum circuit, in which, one can manipulate Quantum circuit using term rewriting & equality saturation techniques. Using this package, one can easily define any syntactic rules of Quantum circuit(for example, mutation between two quantum gates), and apply it to term rewriting and equality saturation Modules provided by[ `Metatheory.jl` ](https://github.com/JuliaSymbolics/Metatheory.jl)(Yes, This project is highly dependent on and highly motivated by [`Metatheory.jl`](https://github.com/JuliaSymbolics/Metatheory.jl)). Doing so, tasks such as circuit simplification, equivalence detection, code generation become easily achievable.
@@ -71,6 +89,7 @@ Where `is_commute` and `is_cancel` are functions provided in `src/gate.jl` to de
 Currently, `is_commute` considers two cases:
   - gate `a` and gate `b` do not have common `Loc` or `cLoc`
   - gate `a/b` is a `Z|S|T` gate, and gate `b/a` is a `CNOT` gate, where `cLoc` of `b/a` has the same index with `Loc` of `a/b`
+
 `is_cancel` considers two cases:
   - gate `a` and gate `b` are identical and they belong to unitary & Hermitian gate
   - gate `a/b` is the dagger version of gate `b/a`
@@ -162,7 +181,7 @@ circ = egraph_simplify(circ, Val(:default_rule); verbose=false)
 ```
 `areequal`: overload of `areequal` function in [`Metatheory.jl`](https://github.com/JuliaSymbolics/Metatheory.jl), using default set of rules
 ```julia
-areequal(circ1, circ2, circ3)
+SymbolicCircuit.areequal(Val(:default_rule), circ1, circ2, circ3)
 ```
 
 #### More information

@@ -67,10 +67,68 @@ function egraph_simplify(circuit, f::Function, rule; verbose=false)
         i += 1
     end
 
+    circuit = rebuild_circuit(circuit)
     return circuit
 
 end
 
-function areequal(exprs...)
-    return areequal(default_rule, exprs...)
+import Metatheory: EGraph, EClassId, AbstractENode, AbstractRule, addexpr!, EqualityGoal, reached
+
+function _areequal(theory::Vector, exprs...; params=SaturationParams())
+    g = EGraph(exprs[1])
+    _areequal(g, theory, exprs...; params=params)
+end
+
+function _areequal(g::EGraph, t::Vector{<:AbstractRule}, exprs...; params=SaturationParams())
+    # @log "Checking equality for " exprs
+    if length(exprs) == 1; return true end
+    # rebuild!(G)
+
+    # @log "starting saturation"
+
+    n = length(exprs)
+    ids = Vector{EClassId}(undef, n)
+    nodes = Vector{AbstractENode}(undef, n)
+    for i ∈ 1:n
+        ec, node = addexpr!(g, exprs[i])
+        ids[i] = ec.id
+        nodes[i] = node
+    end
+
+    goal = EqualityGoal(collect(exprs), ids)
+    
+    # alleq = () -> (all(x -> in_same_set(G.uf, ids[1], x), ids[2:end]))
+
+    params.goal = goal
+    # params.stopwhen = alleq
+
+    report = saturate!(g, t, params)
+
+    if report.reason in [:goalreached, :saturated]
+        return reached(g, goal)
+    else
+        return report.reason 
+    end
+
+    # # display(g.classes); println()
+    # if !(report.reason === :saturated) && !reached(g, goal)
+    #     @show report.reason
+    #     return missing # failed to prove
+    # end
+    # @show report.reason
+    # return reached(g, goal)
+end
+
+
+function areequal(::Val{:default_rule}, exprs...)
+    nexprs = Expr[]
+    for expr in exprs 
+        if get_length(expr)==1
+            expr *= One()
+        end
+        push!(nexprs, expr)
+    end
+
+    params = SaturationParams(timeout=100, eclasslimit=400000, scheduler=BackoffScheduler)
+    return _areequal(default_rule, nexprs...; params=params)
 end
