@@ -12,9 +12,9 @@ pkg> add https://github.com/overshiki/SymbolicCircuit.jl
 
 `SymbolicCircuit.jl` provides a symbolic system for representation of Quantum circuit, in which, one can manipulate Quantum circuit using term rewriting & equality saturation techniques. Using this package, one can easily define any syntactic rules of Quantum circuit(for example, mutation between two quantum gates), and apply it to term rewriting and equality saturation Modules provided by[ `Metatheory.jl` ](https://github.com/JuliaSymbolics/Metatheory.jl)(Yes, This project is highly dependent on and highly motivated by [`Metatheory.jl`](https://github.com/JuliaSymbolics/Metatheory.jl)). Doing so, tasks such as circuit simplification, equivalence detection, code generation become easily achievable.
 
-### What is the symbolic system of `SymbolicCircuit.jl`
+### What is the symbolic system of `SymbolicCircuit.jl`?
 #### Quantum gates
-In `SymbolicCircuit.jl`, quantum gate are represented by the instance of `Gate` struct, for example, the Pauli X gate on 1st Qubit is defined by
+In `SymbolicCircuit.jl`, quantum gates are represented by the instances of `Gate` struct, for example, the Pauli X gate on 1st Qubit is defined by
 ```julia
 using SymbolicCircuit
 x1 = Gate(gX(), [Loc(1), ])
@@ -41,7 +41,7 @@ using SymbolicCircuit
 x1 = Gate(gX(), [Loc(1), ])
 h2 = Gate(gH(), [Loc(2), ])
 y3 = Gate(gY(), [Loc(3), ])
-circ = head_circuit() * x1 * x1 * h2 * y3 * x1 * x1 * h2
+circ = x1 * x1 * h2 * y3 * x1 * x1 * h2
 ```
 This allows flexible ways of defining a circuit, for example, we can also
 ```julia
@@ -92,7 +92,7 @@ y3 = Gate(gY(), [Loc(3), ])
 z2 = Gate(gZ(), [Loc(2), ])
 z3 = Gate(gZ(), [Loc(3), ])
 
-circ = head_circuit() * x1 * z2 * y3 * z3 * x1 * z3
+circ = x1 * z2 * y3 * z3 * x1 * z3
 
 function get_HXH(a::Gate)
     h = Gate(gH(), a.loc)
@@ -104,9 +104,9 @@ r = @rule a a::Gate => get_HXH(a) where is_Z(a)
 r = Postwalk(PassThrough(r))
 @show r(circ)
 ```
-Of course, this is just a simple rewriting rule, and could be done using any non-symbolic systems such as direct coding in qisik|Yao.jl|mindquantum|...(for example, in mindquantum, circuits are represented as object of List class in python, such manipulation could be easily done using pop and insert operations). 
+Of course, this is just a simple rewriting rule, and could be done using any non-symbolic systems such as direct coding in qiskit|Yao.jl|mindquantum|...(for example, in mindquantum, circuits are represented as object of List class in python, such manipulation could be easily done using pop and insert operations). 
 
-The full power of `SymbolicCircuit.jl` comes from the qquality saturation techniques in symbolic & compiler community. In equality saturation(Eqsat), the term rewriting are allowed to be handled without an order. For example, bidirectional rules such as gate commute rule `a*b==b*a` are allowed. The key point of Eqsat is that it allows all combination of rewriting operations to be stored in memory(usually in efficient EGraph data structure as implemented in [`Metatheory.jl`](https://github.com/JuliaSymbolics/Metatheory.jl)), and efficiently traversed. Thus one could set the search goal to search for specific expressions in all equivalent expressions resulted from the rewriting rules, which would be a complex task for non-symbolic systems without Eqsat techniques, such as qisik|Yao.jl|mindquantum|...
+The full power of `SymbolicCircuit.jl` comes from the qquality saturation techniques in symbolic & compiler community. In equality saturation(Eqsat), the term rewriting are allowed to be handled without an order. For example, bidirectional rules such as gate commute rule `a*b==b*a` are allowed. The key point of Eqsat is that it allows all combination of rewriting operations to be stored in memory(usually in efficient EGraph data structure as implemented in [`Metatheory.jl`](https://github.com/JuliaSymbolics/Metatheory.jl)), and efficiently traversed. Thus one could set the search goal to search for specific expressions in all equivalent expressions resulted from the rewriting rules, which would be a complex task for non-symbolic systems without Eqsat techniques, such as qiskit|Yao.jl|mindquantum|...
 
 To demonstrate, let's consider circuit simplification operation. We consider only a combination of commute rule `a*b==b*a where a, b commute` and cancel rule `a*b->0 where a, b could be cancelled`. These simple rules already provide a strategy to simplify a circuit, i.e. for any pair of gates in a circuit, commute if possible, cancel if possible, and then try more commutation and cancellation, until no progress could be made. In a non-symbolic system without Eqsat, such strategy could only be implemented using a heuristic approach without a saturation guarantee(or it could have saturation guarantee but need a lot of codings). In `SymbolicCircuit.jl` it would be easily achiveable and has a guarantee that all possible combination are traversed.
 ```julia
@@ -132,7 +132,7 @@ function simplify(circuit)
     return circuit
 end 
 
-circ = head_circuit() * x1 * x1 * h2 * y3 * x1 * x1 * h2
+circ = x1 * x1 * h2 * y3 * x1 * x1 * h2
 ncirc = simplify(circ)
 ```
 result:
@@ -157,8 +157,8 @@ The list of the functions are:
 
 `egraph_simplify`: circuit simplification using default set of rules
 ```julia
-circ = head_circuit() * x1 * x1 * h2 * y3 * x1 * x1 * h2
-circ = egraph_simplify(circ, _simplify; verbose=false)
+circ = x1 * x1 * h2 * y3 * x1 * x1 * h2
+circ = egraph_simplify(circ, Val(:default_rule); verbose=false)
 ```
 `areequal`: overload of `areequal` function in [`Metatheory.jl`](https://github.com/JuliaSymbolics/Metatheory.jl), using default set of rules
 ```julia

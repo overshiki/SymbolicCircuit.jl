@@ -7,7 +7,7 @@ rx = Gate(rX([:theta, ]), [Loc(3), ])
 x1 = Gate(gX(), [Loc(1), ])
 h2 = Gate(gH(), [Loc(2), ])
 y3 = Gate(gY(), [Loc(3), ])
-circ = head_circuit() * x1 * x1 * h2 * y3 * x1 * x1 * h2
+circ = x1 * x1 * h2 * y3 * x1 * x1 * h2
 
 let circ = head_circuit()
     for _ in 1:2
@@ -33,7 +33,7 @@ y3 = Gate(gY(), [Loc(3), ])
 z2 = Gate(gZ(), [Loc(2), ])
 z3 = Gate(gZ(), [Loc(3), ])
 
-circ = head_circuit() * x1 * z2 * y3 * z3 * x1 * z3
+circ = x1 * z2 * y3 * z3 * x1 * z3
 
 function get_HXH(a::Gate)
     h = Gate(gH(), a.loc)
@@ -67,7 +67,10 @@ function simplify(circuit)
     return circuit
 end 
 
-circ = head_circuit() * x1 * x1 * h2 * y3 * x1 * x1 * h2
+circ = x1 * x1 * h2 * y3 * x1 * x1 * h2
 ncirc = simplify(circ)
 
 areequal(v, circ, ncirc)
+
+circ = x1 * x1 * h2 * y3 * x1 * x1 * h2
+circ = egraph_simplify(circ, Val(:default_rule); verbose=false)

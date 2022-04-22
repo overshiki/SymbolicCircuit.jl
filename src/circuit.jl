@@ -23,6 +23,13 @@ function (*)(a::Expr, b::Union{Gate, Real, One})
     return circuit
 end
 
+function (*)(a::Gate, b::Gate)
+    circuit = :((*)())
+    push!(circuit.args, a)
+    push!(circuit.args, b)
+    return circuit
+end
+
 function head_circuit()
     return :((*)())
 end

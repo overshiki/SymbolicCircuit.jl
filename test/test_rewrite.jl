@@ -8,7 +8,7 @@ z3 = Gate(gZ(), [Loc(3), ])
 cnot_4c2 = Gate(gX(), [Loc(1), cLoc(2)])
 rx1 = Gate(rX([:theta1, ]), [Loc(3), ])
 
-circ = head_circuit() * x1 * z2 * cnot_4c2 * z2 * y3 * z3 * x1 * rx1
+circ = x1 * z2 * cnot_4c2 * z2 * y3 * z3 * x1 * rx1
 
 z2hxh = z2hxh_rewriter()
 

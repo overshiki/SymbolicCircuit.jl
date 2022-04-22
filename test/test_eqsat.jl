@@ -20,11 +20,11 @@ rxn = Gate(rX([:theta1, :theta2]), Q[Loc(3)])
 rxnd = Gate(rXd([:theta2, :theta1]), Q[Loc(3)])
 @show is_AAdagger(rxn, rxnd)
 
-circ = head_circuit() * x1 * z2 * cnot_4c2 * z2 * y3 * z3 * x1 * s3 * s3 * rx1 * rx2 * h2
+circ = x1 * z2 * cnot_4c2 * z2 * y3 * z3 * x1 * s3 * s3 * rx1 * rx2 * h2
 
-ncirc = egraph_simplify(circ, _simplify)
+ncirc = egraph_simplify(circ, Val(:default_rule))
 @show ncirc
 
 circ = circ * dagger_circuit(circ)
-ncirc = egraph_simplify(circ, _simplify)
+ncirc = egraph_simplify(circ, Val(:default_rule))
 @show ncirc
