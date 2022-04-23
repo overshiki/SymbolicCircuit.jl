@@ -33,15 +33,15 @@ struct gS <:SG end
 
 
 struct rX <:RG 
-    theta::Vector{Symbol}
+    theta::Vector{Any}
 end
 
 struct rY <:RG 
-    theta::Vector{Symbol}
+    theta::Vector{Any}
 end
 
 struct rZ <:RG 
-    theta::Vector{Symbol}
+    theta::Vector{Any}
 end
 
 
@@ -56,20 +56,24 @@ struct gHd <:UHG end
 struct gTd <:SG end
 struct gSd <:SG end
 
+struct One end
+struct Positive end
+struct Negative end
+
 
 struct rXd <:RG 
-    theta::Vector{Symbol}
+    theta::Vector{Any}
 end
 
 struct rYd <:RG 
-    theta::Vector{Symbol}
+    theta::Vector{Any}
 end
 
 struct rZd <:RG 
-    theta::Vector{Symbol}
+    theta::Vector{Any}
 end
 
-struct One end
+
 
 
 import Base.(*)
@@ -217,6 +221,15 @@ function is_AAdagger(a::Gate, b::Gate)
 end
 
 
+function is_no_control(a::Gate)
+    for loc in a.loc 
+        if loc isa cLoc 
+            return false 
+        end 
+    end 
+    return true
+end
+
 function is_single_qubit(a::Gate)
     return length(a.loc)==1
 end
@@ -238,6 +251,22 @@ function is_S(a::Gate)
     check = isa(a.g, gS)
     check = check && is_single_qubit(a)
     return check
+end
+
+function get_CNOT_loc_index(a::Gate, ::Val{:loc})
+    for loc in a.loc 
+        if loc isa Loc 
+            return loc.index 
+        end 
+    end
+end
+
+function get_CNOT_loc_index(a::Gate, ::Val{:cloc})
+    for loc in a.loc 
+        if loc isa cLoc 
+            return loc.index 
+        end 
+    end
 end
 
 function is_CNOT(a::Gate)

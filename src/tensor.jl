@@ -12,6 +12,11 @@ function get_tensor(::gX)
     one_c zero_c]
 end
 
+function get_tensor(::gXd)
+    m = get_tensor(gX())
+    return collect(m')
+end
+
 function get_tensor(::gY)
     [zero_c -1.0im; 
     1.0im zero_c]
@@ -40,9 +45,19 @@ end
 
 function get_theta(g::RG, param::Dict)
     theta = 0
+    coeff = 1.0
     for sym in g.theta
-        theta += param[sym]
+        if sym isa Positive
+            coeff *= 1
+        elseif sym isa Negative
+            coeff *= (-1)
+        elseif sym isa Symbol
+            theta += param[sym]
+        else 
+            error()
+        end
     end
+    theta *= coeff
     return theta
 end
 
@@ -115,7 +130,7 @@ function get_tensor(g::Gate, param::Dict, loc_mapping::Dict)
         else
             return [get_tensor(g.g), ], [loc_mapping[index], ]
         end
-    elseif is_CNOT(g)
+    elseif is_CNOT(g) || is_CNOTd(g)
         t, lm = get_tensor(g, Val(:cnot))
         return [t, ], [lm, ]
 
@@ -136,9 +151,9 @@ function get_tensor(gs::Vector{Gate}, param::Dict, loc_mapping::Dict)
         append!(indices, lm)
     end
 
-    out_indices = Char[]
+    out_indices = String[]
     for ind in indices
-        union!(out_indices, Vector{Char}([ind...]))
+        union!(out_indices, Vector{String}([ind...]))
     end
     out_indices = tuple(out_indices...)
 

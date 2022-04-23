@@ -26,6 +26,20 @@ SymbolicCircuit.areequal(Val(:default_rule), circ, ncirc)
 ```
 It will return `true` if `circ` and `ncirc` are in equivalent, otherwise `missing`.
 
+#### Working with Yao.jl
+`SymbolicCircuit.jl` also provides method to turn symbolic circuit defined above to `YaoBlock` in `Yao.jl`, so that the full power of `Yao.jl` would be avaliable
+```
+yao_circ = to_yao(circ; num_qubits=3)
+println(yao_circ)
+```
+To plot the circuit, just do
+```
+to_yaoplot("./test/plot.png", circ)
+```
+It will plot the circuit using `YaoPlots.jl`
+![image](./test/plot.png)
+
+
 ### What does `SymbolicCircuit.jl` provide?
 
 `SymbolicCircuit.jl` provides a symbolic system for representation of Quantum circuit, in which, one can manipulate Quantum circuit using term rewriting & equality saturation techniques. Using this package, one can easily define any syntactic rules of Quantum circuit(for example, mutation between two quantum gates), and apply it to term rewriting and equality saturation Modules provided by[ `Metatheory.jl` ](https://github.com/JuliaSymbolics/Metatheory.jl)(Yes, This project is highly dependent on and highly motivated by [`Metatheory.jl`](https://github.com/JuliaSymbolics/Metatheory.jl)). Doing so, tasks such as circuit simplification, equivalence detection, code generation become easily achievable.
