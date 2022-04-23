@@ -74,7 +74,7 @@ To define a rule, we need to functions:
     - a function that manipulate the object
 
 More specifically, consider a CNOT and T mutate rule:
-![image]("./CNOT_T_commute.png")
+![image]("./tutorial/CNOT_T_commute.png")
 
 We first define a predicate function:
 ```julia
