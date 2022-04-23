@@ -9,6 +9,10 @@ function gate2yao(x::G)
         return :Z 
     elseif x isa gH 
         return :H 
+    elseif x isa gT 
+        return :T
+    elseif x isa gS 
+        return :S
     end
 end
 

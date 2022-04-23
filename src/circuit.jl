@@ -108,7 +108,7 @@ function get_gates(circuit)
     return gates
 end
 
-function show(circuit)
+function show_circuit(circuit)
     gates = get_gates(circuit)
     for g in gates
         @show g

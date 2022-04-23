@@ -18,6 +18,17 @@ one_rules = [
 ]
 
 
+
+
+"""some rewrite rules"""
+to_dagger_rule = @rule x x::Gate => to_dagger(x)
+Z2HXH_rule = @rule a a::Gate => generate_HXH(a) where is_Z(a)
+X2HZH_rule = @rule a a::Gate => generate_HZH(a) where is_X(a)
+"""some rewrite rules end"""
+
+
+
+
 function get_simplify_rules()
     v = AbstractRule[]
     push!(v, ra_rule)
@@ -30,6 +41,13 @@ function get_simplify_rules()
     return v
 end
 
+
+function get_full_simplify_rules()
+    v = get_simplify_rules()
+    push!(v, Z2HXH_rule)
+    push!(v, X2HZH_rule)
+    return v
+end
 # function get_simplify_rules()
 #     v = AbstractRule[]
 #     #commute rule

@@ -240,6 +240,24 @@ function is_Z(a::Gate)
     return check
 end
 
+function is_X(a::Gate)
+    check = isa(a.g, gX)
+    check = check && is_single_qubit(a)
+    return check
+end
+
+
+function is_Y(a::Gate)
+    check = isa(a.g, gY)
+    check = check && is_single_qubit(a)
+    return check
+end
+
+function is_H(a::Gate)
+    check = isa(a.g, gH)
+    check = check && is_single_qubit(a)
+    return check
+end
 
 function is_T(a::Gate)
     check = isa(a.g, gT)
@@ -308,6 +326,26 @@ function is_Zd(a::Gate)
     check = check && is_single_qubit(a)
     return check
 end
+
+function is_Xd(a::Gate)
+    check = isa(a.g, gXd)
+    check = check && is_single_qubit(a)
+    return check
+end
+
+function is_Yd(a::Gate)
+    check = isa(a.g, gYd)
+    check = check && is_single_qubit(a)
+    return check
+end
+
+
+function is_Hd(a::Gate)
+    check = isa(a.g, gHd)
+    check = check && is_single_qubit(a)
+    return check
+end
+
 
 function is_Td(a::Gate)
     check = isa(a.g, gTd)
@@ -510,5 +548,19 @@ function to_dagger(a::Gate)
 end
 
 
+"""generate from vacumm"""
+function generate_HXH(a::Gate)
+    h = Gate(gH(), a.loc)
+    x = Gate(gX(), a.loc)
+    return :($(h) * $(x) * $(h))
+end
+
+function generate_HZH(a::Gate)
+    h = Gate(gH(), a.loc)
+    z = Gate(gZ(), a.loc)
+    return :($(h) * $(z) * $(h))
+end
+
+"""generate from vacumm end"""
 
 # end

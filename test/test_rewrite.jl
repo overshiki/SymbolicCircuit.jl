@@ -1,4 +1,3 @@
-using Metatheory
 using SymbolicCircuit
 
 x1 = Gate(gX(), [Loc(1), ])
@@ -16,3 +15,6 @@ z2hxh = z2hxh_rewriter()
 
 to_dagger = dagger_rewriter()
 @show to_dagger(rx1)
+
+x2hzh = x2hzh_rewriter()
+show_circuit(x2hzh(circ))

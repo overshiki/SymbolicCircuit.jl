@@ -21,9 +21,9 @@ include("rule.jl")
 export get_simplify_rules
 
 include("rewrite.jl")
-export z2hxh_rewriter, dagger_rewriter
+export z2hxh_rewriter, x2hzh_rewriter, dagger_rewriter
 include("circuit.jl")
-export head_circuit, dagger_circuit
+export head_circuit, dagger_circuit, show_circuit
 
 include("eqsat.jl")
 export egraph_simplify
