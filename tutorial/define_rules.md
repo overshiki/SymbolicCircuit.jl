@@ -18,24 +18,25 @@ Where `g` is an instance of type `G`, indicating which type of gate it is: Pauli
 
 `abstract type G end` is an abstract type that has a bounch of subtypes:
 
- -`abstract type UHG <: G end` where UHG stands for unitary & hermitian gates
-    - `struct gX <:UHG end` for Pauli X
-    - `struct gY <:UHG end` for Pauli Y
-    - `struct gZ <:UHG end` for Pauli Z
-    - `struct gH <:UHG end` for Hadamard
- -`abstract type SG <: G end` where SG stands for other non-parametric(static) gates that are not UHG
-    - `struct gS <:SG end` for S gate
-    - `struct gT <:SG end` for T gate
- -`abstract type RG <: G end` where RG stands for rotate gate
-    - `struct rX <:RG theta::Vector{Any} end` for rotate X gate where `theta` is just a vector of parameters it contains
-    - `struct rY <:RG theta::Vector{Any} end` for rotate Y gate
-    - `struct rZ <:RG theta::Vector{Any} end` for rotate Z gate
+    abstract type UHG <: G end where UHG stands for unitary & hermitian gates
+        struct gX <:UHG end for Pauli X
+        struct gY <:UHG end for Pauli Y
+        struct gZ <:UHG end for Pauli Z
+        struct gH <:UHG end for Hadamard
+    abstract type SG <: G end where SG stands for other non-parametric(static) gates that are not UHG
+        struct gS <:SG end for S gate
+        struct gT <:SG end for T gate
+    abstract type RG <: G end where RG stands for rotate gate
+        struct rX <:RG theta::Vector{Any} end for rotate X gate where `theta` is just a vector of parameters it contains
+        struct rY <:RG theta::Vector{Any} end for rotate Y gate
+        struct rZ <:RG theta::Vector{Any} end for rotate Z gate
 
 `SymbolicCircuit.jl` also defined dagger gate seperately, for example, `struct gXd <:UHG end` stands for dagger X gate. However, currently I'm not sure if there are ways to avoid such a redudency of definations.
 
 `abstract type Q end` is an abstract type which stands for qubit:
- -`struct Loc <: Q index::Int64 end` for normal qubit the gate operates on
- -`struct cLoc <: Q index::Int64 end` for control qubit
+
+    struct Loc <: Q index::Int64 end for normal qubit the gate operates on
+    struct cLoc <: Q index::Int64 end for control qubit
 
 A single qubit pauli gate is define in the following way:
 ```julia
@@ -70,13 +71,15 @@ We are ready to define our own rules for quantum circuit :)
 ### the way to define the rules
 
 To define a rule, we need to functions:
-    - a function to determine if the rule should be applied to an input object
-    - a function that manipulate the object
+
+    a function to determine if the rule should be applied to an input object
+    a function that manipulate the object
 
 More specifically, consider a CNOT and T mutate rule:
-![image]("./tutorial/CNOT_T_commute.png")
 
-We first define a predicate function:
+![image](https://github.com/overshiki/SymbolicCircuit.jl/blob/main/tutorial/CNOT_T_commute.png)
+
+We firstly defined a predicate function:
 ```julia
 function is_CNOT(a::Gate)
     if isa(a.g, gX)
@@ -119,4 +122,4 @@ CNOT_T_commute_rule = @rule a b a::Gate * b::Gate => :($(b) * $(a)) where is_CNO
 
 That's it!
 
-Note that the rule above just considered the case where `a` is CNOT and `b` is T, not vice verse way. Also, it does not consider the cases that, since CNOT and T has such a commute way, so does CNOT and S, CNOT and Z. To do this, more complex rules related to expand S/Z into T and merge T into S/Z. For more details, one can refere to `src/rule.jl` on how to define them.
+Note that the rule above just considered the case where `a` is CNOT and `b` is T, not vice verse way. Also, it does not consider the cases that, since CNOT and T has such a commute rule, so does CNOT and S, CNOT and Z. To do this, more complex rules related to expand S/Z into T and merge T into S/Z. For more details, one can refere to `src/rule.jl` on how to define them.
