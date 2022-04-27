@@ -4,43 +4,45 @@ default_rule = get_simplify_rules()
 block_rule = get_block_rules()
 
 
-function _simplify(circuit, ::Val{:default_rule})
-    return _simplify(circuit, default_rule)
+function _simplify(circuit::Circuit, ::Val{:default_rule}, timeout)
+    return _simplify(circuit, default_rule, timeout)
 end 
 
-function _simplify(circuit, ::Val{:block_rule})
-    return _simplify(circuit, block_rule)
+function _simplify(circuit::Circuit, ::Val{:block_rule}, timeout)
+    return _simplify(circuit, block_rule, timeout)
 end 
 
-function _simplify(circuit, v::Vector{<:AbstractRule})
-
+function _simplify(circuit::Circuit, v::Vector{<:AbstractRule}, timeout)
+    circuit = circuit.expr
     g = EGraph(circuit)
-    params = SaturationParams(timeout=10, eclasslimit=40000, scheduler=BackoffScheduler)
+    params = SaturationParams(timeout=timeout, eclasslimit=40000, scheduler=BackoffScheduler)
     report = saturate!(g, v, params)
     circuit = extract!(g, astsize)
+    circuit = Circuit(circuit)
     # println(report.reason)
-    return circuit, report.reason
+    return circuit, report
 end 
 
-function egraph_simplify(circuit, rule; verbose=false)
-    return egraph_simplify(circuit, _simplify, rule; verbose=verbose)
+function egraph_simplify(circuit::Circuit, rule; verbose=false, timeout=100, repeat=10)
+    return egraph_simplify(circuit, _simplify, rule; verbose=verbose, timeout=timeout, repeat=repeat)
 end
 
-function egraph_simplify(circuit, f::Function, rule; verbose=false)
+function egraph_simplify(circuit::Circuit, f::Function, rule; verbose=false, timeout=100, repeat=10)
 
     function _simp(circuit)
-        circuit, reason = f(circuit, rule)
-        if rule==Val(:default_rule)
-            circuit = rebuild_circuit(circuit)
-        end
-        return circuit, reason
+        circuit, report = f(circuit, rule, timeout)
+        # if rule==Val(:default_rule)
+        circuit = rebuild_circuit(circuit)
+        # end
+        return circuit, report
     end
 
     i = 1
     count = 1
     while true
         len = get_length(circuit)
-        circuit, reason = _simp(circuit)
+        circuit, report = _simp(circuit)
+        reason = report.reason
         
         if verbose
             print(i, " ", reason, " ", len, " ")
@@ -50,6 +52,9 @@ function egraph_simplify(circuit, f::Function, rule; verbose=false)
         end
 
         if reason==:saturated
+            if verbose
+                println("saturated")
+            end
             break 
         end
 
@@ -59,8 +64,11 @@ function egraph_simplify(circuit, f::Function, rule; verbose=false)
             count = 1
         end
         
-        if count > 10
-            # println("early stop")
+        if count > repeat
+            if verbose
+                println(report)
+                println("early stop")
+            end
             break 
         end 
 
@@ -120,14 +128,17 @@ function _areequal(g::EGraph, t::Vector{<:AbstractRule}, exprs...; params=Satura
 end
 
 
-function areequal(::Val{:default_rule}, exprs...)
-    nexprs = Expr[]
-    for expr in exprs 
-        if get_length(expr)==1
-            expr *= One()
+function areequal(::Val{:default_rule}, circs...)
+    # exprs = [x.expr for x in circs]
+    ncirc = Circuit[]
+    for circ in circs 
+        if get_length(circ)==1
+            circ *= One()
         end
-        push!(nexprs, expr)
+        push!(ncirc, circ)
     end
+
+    nexprs = [x.expr for x in ncirc]
 
     params = SaturationParams(timeout=100, eclasslimit=400000, scheduler=BackoffScheduler)
     return _areequal(default_rule, nexprs...; params=params)

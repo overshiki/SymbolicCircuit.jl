@@ -1,25 +1,33 @@
 
 
-function dagger_circuit(expr)
+mutable struct Circuit 
+    expr::Union{Expr, One, Gate, Block, Real}
+end
+
+function dagger_circuit(circ::Circuit)
     r = dagger_rewriter()
+    expr = circ.expr
     expr = r(expr)
     circuit = :((*)())
     append!(circuit.args, reverse(expr.args[2:end]))
+    circuit = Circuit(circuit)
     return circuit
 end
 
 import Base.(*)
-function (*)(a::Expr, b::Expr)
+function (*)(a::Circuit, b::Circuit)
     circuit = :((*)())
-    append!(circuit.args, a.args[2:end])
-    append!(circuit.args, b.args[2:end])
+    append!(circuit.args, a.expr.args[2:end])
+    append!(circuit.args, b.expr.args[2:end])
+    circuit = Circuit(circuit)
     return circuit
 end
 
-function (*)(a::Expr, b::Union{Gate, Real, One})
+function (*)(a::Circuit, b::Union{Gate, Real, One, Block})
     circuit = :((*)())
-    append!(circuit.args, a.args[2:end])
+    append!(circuit.args, a.expr.args[2:end])
     push!(circuit.args, b)
+    circuit = Circuit(circuit)
     return circuit
 end
 
@@ -27,11 +35,12 @@ function (*)(a::Gate, b::Gate)
     circuit = :((*)())
     push!(circuit.args, a)
     push!(circuit.args, b)
+    circuit = Circuit(circuit)
     return circuit
 end
 
 function head_circuit()
-    return :((*)())
+    return Circuit(:((*)()))
 end
 
 using MacroTools: postwalk
@@ -48,7 +57,8 @@ function get_length(::Gate)
     return 1
 end
 
-function get_length(circuit::Expr)
+function get_length(circuit::Circuit)
+    circuit = circuit.expr
     gates = []
     postwalk(circuit) do x 
         if typeof(x)==Gate
@@ -60,11 +70,11 @@ function get_length(circuit::Expr)
     return length(gates)
 end
 
-function show_length(circuit)
+function show_length(circuit::Circuit)
     println("length of circuit: ", get_length(circuit))
 end
 
-function get_gates(circuit, ::Val{:withblock})
+function get_gates(circuit::Circuit, ::Val{:withblock})
     gates = get_gates(circuit)
     ngates = []
     for g in gates
@@ -80,7 +90,8 @@ function get_gates(circuit, ::Val{:withblock})
 end
 
 
-function get_gates(circuit)
+function get_gates(circuit::Circuit)
+    circuit = circuit.expr
     gates = []
     postwalk(circuit) do x 
         # @show x, x isa Gate || x isa One, typeof(x)
@@ -108,7 +119,7 @@ function get_gates(circuit)
     return gates
 end
 
-function show_circuit(circuit)
+function show_circuit(circuit::Circuit)
     gates = get_gates(circuit)
     for g in gates
         @show g
@@ -116,7 +127,7 @@ function show_circuit(circuit)
     @show length(gates)
 end
 
-function rebuild_circuit(circuit::Expr)
+function rebuild_circuit(circuit::Circuit)
     gates = get_gates(circuit)
     return rebuild_circuit(gates)
 end
@@ -149,7 +160,7 @@ function union!(theta_set::Vector{Symbol}, theta_subset::Vector{Symbol})
     end
 end
 
-function get_parameters(circuit)
+function get_parameters(circuit::Circuit)
     gates = get_gates(circuit)
     thetas = Symbol[]
     for g in gates
@@ -158,4 +169,49 @@ function get_parameters(circuit)
         end
     end
     return thetas
+end
+
+
+function count_gates(circuit::Circuit)
+    """
+    used to include the number of gates contained in blocks
+    """
+    gates = get_gates(circuit)
+    count = []
+    for g in gates 
+        local _count = 0
+        if g isa Gate 
+            _count = 1 
+        elseif g isa Block 
+            _count = length(g.gates)
+        else 
+            error()
+        end
+        push!(count, _count)
+    end
+
+    println(sum(count))
+
+end
+
+function max_indices(gate::Gate, num_qubits)
+    for index in loc_indices(gate)
+        num_qubits = max(num_qubits, index)
+    end 
+    return num_qubits
+end
+
+function max_indices(b::Block, num_qubits)
+    for gate in b.gates
+        num_qubits = max_indices(gate, num_qubits)
+    end 
+    return num_qubits
+end
+
+function max_indices(circ::Circuit)
+    num_qubits = 0
+    for gate in get_gates(circ)
+        num_qubits = max_indices(gate, num_qubits)
+    end 
+    return num_qubits
 end

@@ -4,6 +4,7 @@ authors = ["overshiki <le.niu@hotmail.com>"]
 version = "0.1.0"
 
 [deps]
+BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
 Cairo = "159f3aea-2a34-519c-b102-8c37f9878175"
 Compose = "a81c6b42-2e10-5240-aca2-a61377ecd94b"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
@@ -11,6 +12,7 @@ Metatheory = "e9d8d322-4543-424a-9be4-0cc815abe26c"
 OMEinsum = "ebe7aa44-baf0-506c-a96f-8464559b3922"
 Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
 YaoPlots = "32cfe2d9-419e-45f2-8191-2267705d8dbc"
+YaoToEinsum = "9b173c7b-dc24-4dc5-a0e1-adab2f7b6ba9"
 
 [compat]
 MacroTools = "0.5.9"

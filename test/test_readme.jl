@@ -43,7 +43,7 @@ end
 
 r = @rule a a::Gate => get_HXH(a) where is_Z(a)
 r = Postwalk(PassThrough(r))
-@show r(circ)
+@show r(circ.expr)
 
 using SymbolicCircuit
 using Metatheory

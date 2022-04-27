@@ -11,10 +11,10 @@ circ = x1 * z2 * cnot_4c2 * z2 * y3 * z3 * x1 * rx1
 
 z2hxh = z2hxh_rewriter()
 
-@show z2hxh(circ)
+@show z2hxh(circ.expr)
 
 to_dagger = dagger_rewriter()
 @show to_dagger(rx1)
 
 x2hzh = x2hzh_rewriter()
-show_circuit(x2hzh(circ))
+show_circuit(Circuit(x2hzh(circ.expr)))

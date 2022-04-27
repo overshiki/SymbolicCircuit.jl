@@ -5,3 +5,6 @@
 # environment.
 Manifest.toml
 *local_test*
+*local_examples*
+*issues*
+*local_src*

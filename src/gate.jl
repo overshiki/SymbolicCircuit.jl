@@ -45,6 +45,9 @@ struct rZ <:RG
 end
 
 
+struct A <: Hamiltonian end 
+struct Ad <: Hamiltonian end
+
 
 
 """dagger gate"""
@@ -559,6 +562,25 @@ function generate_HZH(a::Gate)
     h = Gate(gH(), a.loc)
     z = Gate(gZ(), a.loc)
     return :($(h) * $(z) * $(h))
+end
+
+function is_HXH(a::Gate, b::Gate, c::Gate)
+    return is_H(a)&&is_X(b)&&is_H(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)
+end
+
+function generate_Z(a::Gate)
+    z = Gate(gZ(), a.loc)
+    return :($z)
+end
+
+
+function is_HZH(a::Gate, b::Gate, c::Gate)
+    return is_H(a)&&is_Z(b)&&is_H(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)
+end
+
+function generate_X(a::Gate)
+    x = Gate(gX(), a.loc)
+    return :($x)
 end
 
 """generate from vacumm end"""

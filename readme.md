@@ -136,7 +136,7 @@ end
 
 r = @rule a a::Gate => get_HXH(a) where is_Z(a)
 r = Postwalk(PassThrough(r))
-@show r(circ)
+@show Circuit(r(circ.expr))
 ```
 Of course, this is just a simple rewriting rule, and could be done using any non-symbolic systems such as direct coding in qiskit|Yao.jl|mindquantum|...(for example, in mindquantum, circuits are represented as object of List class in python, such manipulation could be easily done using pop and insert operations). 
 
