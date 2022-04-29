@@ -23,11 +23,11 @@ function _simplify(circuit::Circuit, v::Vector{<:AbstractRule}, timeout)
     return circuit, report
 end 
 
-function egraph_simplify(circuit::Circuit, rule; verbose=false, timeout=100, repeat=10)
+function egraph_simplify(circuit::Circuit, rule; verbose=false, timeout=100, repeat=3)
     return egraph_simplify(circuit, _simplify, rule; verbose=verbose, timeout=timeout, repeat=repeat)
 end
 
-function egraph_simplify(circuit::Circuit, f::Function, rule; verbose=false, timeout=100, repeat=10)
+function egraph_simplify(circuit::Circuit, f::Function, rule; verbose=false, timeout=100, repeat=3)
 
     function _simp(circuit)
         circuit, report = f(circuit, rule, timeout)
@@ -45,7 +45,7 @@ function egraph_simplify(circuit::Circuit, f::Function, rule; verbose=false, tim
         reason = report.reason
         
         if verbose
-            print(i, " ", reason, " ", len, " ")
+            print(i, " ", reason, " ")
             show_length(circuit)
             # println(circuit)
             println()

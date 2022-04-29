@@ -40,16 +40,16 @@ Where `g` is an instance of type `G`, indicating which type of gate it is: Pauli
 
 A single qubit pauli gate is define in the following way:
 ```julia
-x1 = Gate(gX(), [Loc(1)])
+x1 = UGate(gX(), [Loc(1)])
 ```
 And for CNOT operate on qubit 2 and controlled by qubit one:
 ```julia
-x2c1 = Gate(gX(), [Loc(2), cLoc(1)])
+x2c1 = UGate(gX(), [Loc(2), cLoc(1)])
 ```
 
 rotate X with angle `theta1 + theta2` is defined:
 ```julia
-rx1 = Gate(rX([:theta1, :theta2]), [Loc(1)])
+rx1 = UGate(rX([:theta1, :theta2]), [Loc(1)])
 ```
 The reason there allow mutiple angles is because in VQE system, a lot of ansatz has a linear mapping between the rotation angle and their parameters. A symbolic system like this will represent such phenomenon correctly.
 
@@ -59,12 +59,12 @@ circ = x1 * x2c1 * rx1
 ```
 It just looks like this, if you print it:
 ```
-:(Gate(gX(), Q[Loc(1)]) * Gate(gX(), Q[Loc(2), cLoc(1)]) * Gate(rX(Any[:theta1, :theta2]), Q[Loc(1)]))
+:(UGate(gX(), Q[Loc(1)]) * UGate(gX(), Q[Loc(2), cLoc(1)]) * UGate(rX(Any[:theta1, :theta2]), Q[Loc(1)]))
 ```
 
 You see, it is just an expression!
 
-The trick of `SymbolicCircuit.jl` is that it takes a chain of gate(quantum circuit) into an AST in julia, and systems like `Metatheory.jl` can easily handle it.
+The trick of `SymbolicCircuit.jl` is that it takes a chain of Ugate(quantum circuit) into an AST in julia, and systems like `Metatheory.jl` can easily handle it.
 
 We are ready to define our own rules for quantum circuit :)
 

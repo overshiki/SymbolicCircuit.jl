@@ -1,12 +1,12 @@
 using SymbolicCircuit
 
-x1 = Gate(gX(), [Loc(1), ])
-cnot_1c2 = Gate(gX(), [Loc(1), cLoc(2)])
-rx = Gate(rX([:theta, ]), [Loc(3), ])
+x1 = UGate(gX(), [Loc(1), ])
+cnot_1c2 = UGate(gX(), [Loc(1), cLoc(2)])
+rx = UGate(rX([:theta, ]), [Loc(3), ])
 
-x1 = Gate(gX(), [Loc(1), ])
-h2 = Gate(gH(), [Loc(2), ])
-y3 = Gate(gY(), [Loc(3), ])
+x1 = UGate(gX(), [Loc(1), ])
+h2 = UGate(gH(), [Loc(2), ])
+y3 = UGate(gY(), [Loc(3), ])
 circ = x1 * x1 * h2 * y3 * x1 * x1 * h2
 
 let circ = head_circuit()
@@ -28,16 +28,16 @@ com_rule = @rule a b a::Gate * b::Gate => :($(b) * $(a)) where is_commute(a, b)
 #cancel rules
 can_rule = @rule a b a::Gate * b::Gate => One() where is_cancel(a, b)
 
-x1 = Gate(gX(), [Loc(1), ])
-y3 = Gate(gY(), [Loc(3), ])
-z2 = Gate(gZ(), [Loc(2), ])
-z3 = Gate(gZ(), [Loc(3), ])
+x1 = UGate(gX(), [Loc(1), ])
+y3 = UGate(gY(), [Loc(3), ])
+z2 = UGate(gZ(), [Loc(2), ])
+z3 = UGate(gZ(), [Loc(3), ])
 
 circ = x1 * z2 * y3 * z3 * x1 * z3
 
 function get_HXH(a::Gate)
-    h = Gate(gH(), a.loc)
-    x = Gate(gX(), a.loc)
+    h = UGate(gH(), a.loc)
+    x = UGate(gX(), a.loc)
     return :($(h) * $(x) * $(h))
 end
 
@@ -78,9 +78,9 @@ circ = egraph_simplify(circ, Val(:default_rule); verbose=false)
 
 
 using SymbolicCircuit
-x1 = Gate(gX(), [Loc(1), ])
-h2 = Gate(gH(), [Loc(2), ])
-y3 = Gate(gY(), [Loc(3), ])
+x1 = UGate(gX(), [Loc(1), ])
+h2 = UGate(gH(), [Loc(2), ])
+y3 = UGate(gY(), [Loc(3), ])
 circ = x1 * x1 * h2 * y3 * x1 * x1 * h2
 ncirc = egraph_simplify(circ, Val(:default_rule))
 # ncirc *= One()

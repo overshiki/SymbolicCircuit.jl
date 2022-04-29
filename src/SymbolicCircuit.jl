@@ -7,9 +7,9 @@ include("gate.jl")
 
 export G, UHG, SG, RG, Hamiltonian, Pauli
 export gX, gY, gZ, gS, gT, gH, rX, rY, rZ
-export gXd, gYd, gZd, gSd, gTd, gHd, rXd, rYd, rZd
+# export gXd, gYd, gZd, gSd, gTd, gHd, rXd, rYd, rZd
 export Q, Loc, cLoc
-export Gate, One, Positive, Negative
+export Gate, One, Positive, Negative, UGate, DaggerGate
 
 
 include("block.jl")

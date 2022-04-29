@@ -12,9 +12,9 @@ pkg> add https://github.com/overshiki/SymbolicCircuit.jl
 To define and simplify a quantum circuit, just do
 ```julia
 using SymbolicCircuit
-x1 = Gate(gX(), [Loc(1), ])
-h2 = Gate(gH(), [Loc(2), ])
-y3 = Gate(gY(), [Loc(3), ])
+x1 = UGate(gX(), [Loc(1), ])
+h2 = UGate(gH(), [Loc(2), ])
+y3 = UGate(gY(), [Loc(3), ])
 circ = x1 * x1 * h2 * y3 * x1 * x1 * h2
 ncirc = egraph_simplify(circ, Val(:default_rule))
 ```
@@ -50,30 +50,31 @@ It will plot the circuit using `YaoPlots.jl`
 In `SymbolicCircuit.jl`, quantum gates are represented by the instances of `Gate` struct, for example, the Pauli X gate on 1st Qubit is defined by
 ```julia
 using SymbolicCircuit
-x1 = Gate(gX(), [Loc(1), ])
+x1 = UGate(gX(), [Loc(1), ])
 ```
-Where `gX()` represents the type of Pauli X(gX is short for gate X), `Loc(1)` indicates the gate is applied on Qubit 1.
+Where `UGate` is alias for `Gate{Normal}`, where the counterpart is `Gate{Dagger}` which stands for `daggered` version of `UGate`.  
+`gX()` represents the type of Pauli X(gX is short for gate X), `Loc(1)` indicates the gate is applied on Qubit 1.
 We can also define multi-Qubits gate, for example, CNOT gate on 1st Qubit and controlled by 2nd Qubit
 ```julia
-cnot_1c2 = Gate(gX(), [Loc(1), cLoc(2)])
+cnot_1c2 = UGate(gX(), [Loc(1), cLoc(2)])
 ```
 Where `cLoc(2)` indicates the gate is controlled by 2nd Qubit
 
 We can also define parametric gate such as rotate X, controlled by parameter `:theta`
 ```julia
-rx = Gate(rX([:theta, ]), [Loc(3), ])
+rx = UGate(rX([:theta, ]), [Loc(3), ])
 ```
 Since simplifying many VQE circuits will often result in rotate gate controlled by multiple parameters(sum of multiple rotate angles), we also allow this
 ```julia
-rx2 = Gate(rX([:theta1, :theta2, :theta3]), [Loc(3), ])
+rx2 = UGate(rX([:theta1, :theta2, :theta3]), [Loc(3), ])
 ```
 #### Quantum circuit
 It is wellknown that, symbolically, quantum circuit is just a chain of quantum gate, applied from left to the right. In `SymbolicCircuit.jl`, we define quantum circuit as expression of gates connected by `*` operator. 
 ```julia
 using SymbolicCircuit
-x1 = Gate(gX(), [Loc(1), ])
-h2 = Gate(gH(), [Loc(2), ])
-y3 = Gate(gY(), [Loc(3), ])
+x1 = UGate(gX(), [Loc(1), ])
+h2 = UGate(gH(), [Loc(2), ])
+y3 = UGate(gY(), [Loc(3), ])
 circ = x1 * x1 * h2 * y3 * x1 * x1 * h2
 ```
 This allows flexible ways of defining a circuit, for example, we can also
@@ -121,16 +122,16 @@ using SymbolicCircuit: is_Z, is_commute, is_cancel
 using Metatheory
 using Metatheory: PassThrough, Postwalk
 
-x1 = Gate(gX(), [Loc(1), ])
-y3 = Gate(gY(), [Loc(3), ])
-z2 = Gate(gZ(), [Loc(2), ])
-z3 = Gate(gZ(), [Loc(3), ])
+x1 = UGate(gX(), [Loc(1), ])
+y3 = UGate(gY(), [Loc(3), ])
+z2 = UGate(gZ(), [Loc(2), ])
+z3 = UGate(gZ(), [Loc(3), ])
 
 circ = x1 * z2 * y3 * z3 * x1 * z3
 
 function get_HXH(a::Gate)
-    h = Gate(gH(), a.loc)
-    x = Gate(gX(), a.loc)
+    h = UGate(gH(), a.loc)
+    x = UGate(gX(), a.loc)
     return :($(h) * $(x) * $(h))
 end
 
@@ -171,7 +172,7 @@ ncirc = simplify(circ)
 ```
 result:
 ```julia
-Gate(gY(), Q[Loc(3)])
+UGate(gY(), Q[Loc(3)])
 ```
 
 Another powerful function provided by the system is that, it allows to detect if two circuit are in equivalence under certain rules. For example, continue from the above circuit simplification task, just do

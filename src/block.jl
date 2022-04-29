@@ -99,9 +99,9 @@ function block_expand(a::Block, indices_mapping::Dict)
         loc = [typeof(l)(indices_mapping[l.index]) for l in g.loc]
         if g.g isa RG 
             theta = g.g.theta
-            ng = Gate(typeof(g.g)(theta), loc)
+            ng = typeof(g)(typeof(g.g)(theta), loc)
         else
-            ng = Gate(typeof(g.g)(), loc)
+            ng = typeof(g)(typeof(g.g)(), loc)
         end
         circ *= ng
     end

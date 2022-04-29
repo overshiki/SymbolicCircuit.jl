@@ -102,10 +102,18 @@ struct cLoc <: Q
     index::Int64
 end
 
-struct Gate 
+abstract type D end
+struct Normal <: D end 
+struct Dagger <: D end
+
+struct Gate{T<:D} 
     g::G
     loc::Vector{Q}
 end
+
+const UGate = Gate{Normal}
+const DaggerGate = Gate{Dagger}
+
 
 # struct CommuteClause
 #     gate1::Gate
@@ -122,18 +130,18 @@ end
 #     Circuit(gates...) = new(gates)
 # end
 
-dagger_dict = Dict(gX=>gXd, gY=>gYd, gZ=>gZd, gH=>gHd, gT=>gTd, gS=>gSd, rX=>rXd, rY=>rYd, rZ=>rZd)
-rev_dagger_dict = Dict(values(dagger_dict).=> keys(dagger_dict))
-merge!(dagger_dict, rev_dagger_dict)
+# dagger_dict = Dict(gX=>gXd, gY=>gYd, gZ=>gZd, gH=>gHd, gT=>gTd, gS=>gSd, rX=>rXd, rY=>rYd, rZ=>rZd)
+# rev_dagger_dict = Dict(values(dagger_dict).=> keys(dagger_dict))
+# merge!(dagger_dict, rev_dagger_dict)
 
 function gate2string(g::Gate)
     type_dict = Dict(gX=>"X", gY=>"Y", gZ=>"Z", 
                     gH=>"H", gT=>"T", gS=>"S", 
-                    rX=>"RX", rY=>"RY", rZ=>"RZ", 
-                    gXd=>"X_dagger", gYd=>"Y_dagger", 
-                    gZd=>"Z_dagger", gHd=>"H_dagger", 
-                    gTd=>"T_dagger", gSd=>"S_dagger", 
-                    rXd=>"RX_dagger", rYd=>"RY_dagger", rZd=>"RZ_dagger")
+                    rX=>"RX", rY=>"RY", rZ=>"RZ", )
+                    # gXd=>"X_dagger", gYd=>"Y_dagger", 
+                    # gZd=>"Z_dagger", gHd=>"H_dagger", 
+                    # gTd=>"T_dagger", gSd=>"S_dagger", 
+                    # rXd=>"RX_dagger", rYd=>"RY_dagger", rZd=>"RZ_dagger")
 
     g_str = type_dict[typeof(g.g)]
     for loc in g.loc 
@@ -194,13 +202,13 @@ function is_gate_type_identity(a::Gate, b::Gate)
 end
 
 function is_cancel(a::Gate, b::Gate)
-    if is_loc_identity(a, b) && is_loc_type_identity(a, b) && is_gate_type_identity(a, b) && isa(a.g, UHG)
+    if is_loc_identity(a, b) && is_loc_type_identity(a, b) && is_gate_type_identity(a, b) && isa(a.g, UHG) || is_AAdagger(a, b)
         return true 
     end 
 
-    if is_AAdagger(a, b)
-        return true 
-    end
+    # if is_AAdagger(a, b)
+    #     return true 
+    # end
 
     return false
 end
@@ -209,8 +217,13 @@ function is_gate_type_inverse(a::Gate, b::Gate)
     if isa(a.g, Hamiltonian) || isa(b.g, Hamiltonian)
         return false
     else
-        return typeof(a.g)==dagger_dict[typeof(b.g)]
+        # return typeof(a.g)==dagger_dict[typeof(b.g)]
+        if (a isa Gate{Normal} && b isa Gate{Dagger}) || (b isa Gate{Normal} && a isa Gate{Dagger})
+            return true 
+        end 
     end
+
+    return false
 end
 
 function is_AAdagger(a::Gate, b::Gate)
@@ -311,90 +324,93 @@ end
 
 
 function is_CNOT_T_commute(a::Gate, b::Gate)
-    if is_CNOT(a) && (is_T(b) || is_S(b) || is_Z(b))
-        for loc in a.loc 
-            if isa(loc, cLoc)
-                index = loc.index 
-                if index == b.loc[1].index 
-                    return true 
-                end 
-            end 
-        end 
-    end 
-    return false 
-end
-
-
-
-
-
-"""some dagger rule"""
-
-function is_Zd(a::Gate)
-    check = isa(a.g, gZd)
-    check = check && is_single_qubit(a)
-    return check
-end
-
-function is_Xd(a::Gate)
-    check = isa(a.g, gXd)
-    check = check && is_single_qubit(a)
-    return check
-end
-
-function is_Yd(a::Gate)
-    check = isa(a.g, gYd)
-    check = check && is_single_qubit(a)
-    return check
-end
-
-
-function is_Hd(a::Gate)
-    check = isa(a.g, gHd)
-    check = check && is_single_qubit(a)
-    return check
-end
-
-
-function is_Td(a::Gate)
-    check = isa(a.g, gTd)
-    check = check && is_single_qubit(a)
-    return check
-end
-
-function is_Sd(a::Gate)
-    check = isa(a.g, gSd)
-    check = check && is_single_qubit(a)
-    return check
-end
-
-function is_CNOTd(a::Gate)
-    if isa(a.g, gXd)
-        if length(a.loc)==2
-            if isa(a.loc[1], Loc) || isa(a.loc[2], Loc)
-                if isa(a.loc[1], cLoc) || isa(a.loc[2], cLoc)
-                    return true 
+    if (a isa Gate{Normal} && b isa Gate{Normal}) || (a isa Gate{Dagger} && b isa Gate{Dagger})
+        if is_CNOT(a) && (is_T(b) || is_S(b) || is_Z(b))
+            for loc in a.loc 
+                if isa(loc, cLoc)
+                    index = loc.index 
+                    if index == b.loc[1].index 
+                        return true 
+                    end 
                 end 
             end 
         end 
     end
+
     return false 
 end
 
 
-function is_CNOTd_Td_commute(a::Gate, b::Gate)
-    if is_CNOTd(a) && (is_Td(b) || is_Sd(b) || is_Zd(b))
-        for loc in a.loc 
-            if isa(loc, cLoc)
-                index = loc.index 
-                if index == b.loc[1].index 
-                    return true 
-                end 
-            end 
-        end 
-    end 
-    return false 
-end
+
+
+
+# """some dagger rule"""
+
+# function is_Zd(a::Gate)
+#     check = isa(a.g, gZd)
+#     check = check && is_single_qubit(a)
+#     return check
+# end
+
+# function is_Xd(a::Gate)
+#     check = isa(a.g, gXd)
+#     check = check && is_single_qubit(a)
+#     return check
+# end
+
+# function is_Yd(a::Gate)
+#     check = isa(a.g, gYd)
+#     check = check && is_single_qubit(a)
+#     return check
+# end
+
+
+# function is_Hd(a::Gate)
+#     check = isa(a.g, gHd)
+#     check = check && is_single_qubit(a)
+#     return check
+# end
+
+
+# function is_Td(a::Gate)
+#     check = isa(a.g, gTd)
+#     check = check && is_single_qubit(a)
+#     return check
+# end
+
+# function is_Sd(a::Gate)
+#     check = isa(a.g, gSd)
+#     check = check && is_single_qubit(a)
+#     return check
+# end
+
+# function is_CNOTd(a::Gate)
+#     if isa(a.g, gXd)
+#         if length(a.loc)==2
+#             if isa(a.loc[1], Loc) || isa(a.loc[2], Loc)
+#                 if isa(a.loc[1], cLoc) || isa(a.loc[2], cLoc)
+#                     return true 
+#                 end 
+#             end 
+#         end 
+#     end
+#     return false 
+# end
+
+
+# function is_CNOTd_Td_commute(a::Gate, b::Gate)
+#     if is_CNOTd(a) && (is_Td(b) || is_Sd(b) || is_Zd(b))
+#         for loc in a.loc 
+#             if isa(loc, cLoc)
+#                 index = loc.index 
+#                 if index == b.loc[1].index 
+#                     return true 
+#                 end 
+#             end 
+#         end 
+#     end 
+#     return false 
+# end
 
 
 
@@ -426,9 +442,9 @@ function is_commute(a::Gate, b::Gate)
         return true 
     end 
 
-    if is_CNOTd_Td_commute(a, b) || is_CNOTd_Td_commute(b, a)
-        return true 
-    end 
+    # if is_CNOTd_Td_commute(a, b) || is_CNOTd_Td_commute(b, a)
+    #     return true 
+    # end 
 
 
     return false
@@ -450,12 +466,12 @@ end
 function is_expand(a::Gate)
     if is_S(a) 
         return true 
-    elseif is_Sd(a) 
-        return true 
+    # elseif is_Sd(a) 
+    #     return true 
     elseif is_Z(a) 
         return true
-    elseif is_Zd(a) 
-        return true 
+    # elseif is_Zd(a) 
+    #     return true 
     end 
     return false
 end
@@ -465,23 +481,23 @@ end
 function expand(a::Gate)
     if is_S(a)
         index = a.loc[1].index
-        g = Gate(gT(), [Loc(index), ])
+        g = typeof(a)(gT(), [Loc(index), ])
         return :($(g) * $(g))
 
-    elseif is_Sd(a)
-        index = a.loc[1].index
-        g = Gate(gTd(), [Loc(index), ])
-        return :($(g) * $(g))
+    # elseif is_Sd(a)
+    #     index = a.loc[1].index
+    #     g = typeof(a)(gTd(), [Loc(index), ])
+    #     return :($(g) * $(g))
 
     elseif is_Z(a)
         index = a.loc[1].index
-        g = Gate(gS(), [Loc(index), ])
+        g = typeof(a)(gS(), [Loc(index), ])
         return :($(g) * $(g))
 
-    elseif is_Zd(a)
-        index = a.loc[1].index
-        g = Gate(gSd(), [Loc(index), ])
-        return :($(g) * $(g))
+    # elseif is_Zd(a)
+    #     index = a.loc[1].index
+    #     g = typeof(a)(gSd(), [Loc(index), ])
+    #     return :($(g) * $(g))
     end 
     error()
 end
@@ -494,14 +510,14 @@ end
 
 function is_merge(a::Gate, b::Gate)
     if is_loc_identity(a, b)
-        if is_S(a) && is_S(b)
+        if is_S(a) && is_S(b) && !is_AAdagger(a, b)
             return true 
-        elseif is_Sd(a) && is_Sd(b)
-            return true 
-        elseif is_T(a) && is_T(b)
+        # elseif is_Sd(a) && is_Sd(b)
+        #     return true 
+        elseif is_T(a) && is_T(b) && !is_AAdagger(a, b)
             return true
-        elseif is_Td(a) && is_Td(b)
-            return true 
+        # elseif is_Td(a) && is_Td(b)
+        #     return true 
         elseif is_r_merge(a, b)
             return true
         end 
@@ -511,23 +527,23 @@ end
 
 function merge(a::Gate, b::Gate)
     if is_S(a)
-        g = Gate(gZ(), a.loc)
+        g = typeof(a)(gZ(), a.loc)
         return :($(g))
 
-    elseif is_Sd(a)
-        g = Gate(gZd(), a.loc)
-        return :($(g))
+    # elseif is_Sd(a)
+    #     g = typeof(a)(gZd(), a.loc)
+    #     return :($(g))
 
     elseif is_T(a)
-        g = Gate(gS(), a.loc)
+        g = typeof(a)(gS(), a.loc)
         return :($(g))
 
-    elseif is_Td(a)
-        g = Gate(gSd(), a.loc)
-        return :($(g))
+    # elseif is_Td(a)
+    #     g = typeof(a)(gSd(), a.loc)
+    #     return :($(g))
 
     elseif is_r_merge(a, b)
-        g = Gate(a.g*b.g, a.loc)
+        g = typeof(a)(a.g*b.g, a.loc)
         return :($(g))
     end 
     error()
@@ -545,10 +561,23 @@ end
 
 function to_dagger(a::Gate)
     if isa(a.g, Union{UHG, SG})
-        g = Gate(dagger_dict[typeof(a.g)](), a.loc)
+        if a isa Gate{Normal}
+            g = Gate{Dagger}(typeof(a.g)(), a.loc)
+        elseif a isa Gate{Dagger}
+            g = Gate{Normal}(typeof(a.g)(), a.loc)
+        else 
+            error() 
+        end 
+
     elseif isa(a.g, RG)
         theta = a.g.theta
-        g = Gate(dagger_dict[typeof(a.g)](theta), a.loc)
+        if a isa Gate{Normal}
+            g = Gate{Dagger}(typeof(a.g)(theta), a.loc)
+        elseif a isa Gate{Dagger}
+            g = Gate{Normal}(typeof(a.g)(theta), a.loc)
+        else 
+            error()
+        end
     else 
         error()
     end
@@ -559,52 +588,52 @@ end
 
 """generate from vacumm"""
 function generate_HXH(a::Gate)
-    h = Gate(gH(), a.loc)
-    x = Gate(gX(), a.loc)
+    h = typeof(a)(gH(), a.loc)
+    x = typeof(a)(gX(), a.loc)
     return :($(h) * $(x) * $(h))
 end
 
 function generate_HZH(a::Gate)
-    h = Gate(gH(), a.loc)
-    z = Gate(gZ(), a.loc)
+    h = typeof(a)(gH(), a.loc)
+    z = typeof(a)(gZ(), a.loc)
     return :($(h) * $(z) * $(h))
 end
 
 function generate_HYH(a::Gate)
-    h = Gate(gH(), a.loc)
-    y = Gate(gY(), a.loc)
+    h = typeof(a)(gH(), a.loc)
+    y = typeof(a)(gY(), a.loc)
     return :($(h) * $(y) * $(h))
 end
 
 function is_HXH(a::Gate, b::Gate, c::Gate)
-    return is_H(a)&&is_X(b)&&is_H(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)
+    return is_H(a)&&is_X(b)&&is_H(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)&&!is_gate_type_inverse(a, b)&&!is_gate_type_inverse(a, c)
 end
 
 function is_HZH(a::Gate, b::Gate, c::Gate)
-    return is_H(a)&&is_Z(b)&&is_H(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)
+    return is_H(a)&&is_Z(b)&&is_H(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)&&!is_gate_type_inverse(a, b)&&!is_gate_type_inverse(a, c)
 end
 function is_HYH(a::Gate, b::Gate, c::Gate)
-    return is_H(a)&&is_Y(b)&&is_H(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)
+    return is_H(a)&&is_Y(b)&&is_H(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)&&!is_gate_type_inverse(a, b)&&!is_gate_type_inverse(a, c)
 end
 
 function is_XYZ(a::Gate, b::Gate, c::Gate)
-    return is_X(a)&&is_Y(b)&&is_Z(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)
+    return is_X(a)&&is_Y(b)&&is_Z(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)&&!is_gate_type_inverse(a, b)&&!is_gate_type_inverse(a, c)
 end
 
 
 function generate_Z(a::Gate)
-    z = Gate(gZ(), a.loc)
+    z = typeof(a)(gZ(), a.loc)
     return :($z)
 end
 
 
 function generate_X(a::Gate)
-    x = Gate(gX(), a.loc)
+    x = typeof(a)(gX(), a.loc)
     return :($x)
 end
 
 function generate_Y(a::Gate)
-    x = Gate(gY(), a.loc)
+    x = typeof(a)(gY(), a.loc)
     return :($x)
 end
 

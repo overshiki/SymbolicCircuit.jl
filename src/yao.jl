@@ -24,7 +24,7 @@ end
 
 function gate2yao(x::Gate, num_qubits)
     exprs = Expr[]
-    if is_CNOT(x) || is_CNOTd(x)
+    if is_CNOT(x) #|| is_CNOTd(x)
         control_index = get_CNOT_loc_index(x, Val(:cloc))
         loc_index = get_CNOT_loc_index(x, Val(:loc))
         expr = :(cnot($control_index, $loc_index))

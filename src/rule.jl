@@ -9,6 +9,12 @@ expand_rule = @rule a a::Gate => expand(a) where is_expand(a)
 merge_rule = @rule a b a::Gate * b::Gate => merge(a, b) where is_merge(a, b)
 
 
+"""could be used, but does not work well"""
+# commute_rule = @rule a b a::Gate * b::Gate --> b * a where is_commute(a, b)
+# cancel_rule = @rule a b a::Gate * b::Gate --> One() where is_cancel(a, b)
+"""end"""
+
+
 one_rules = @theory a b begin 
     b::One * a::Gate --> a
     a::Gate * b::One --> a
