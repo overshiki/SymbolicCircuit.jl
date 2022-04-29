@@ -17,25 +17,40 @@ merge_rule = @rule a b a::Gate * b::Gate => merge(a, b) where is_merge(a, b)
 #     @rule a b a::Real * b::One => :($(a))
 # ]
 
-one_rules = [
-    @rule a b b::One * a::Gate --> a
-    @rule a b a::Gate * b::One --> a
-    @rule a b b::One * a::Real --> a
-    @rule a b a::Real * b::One --> a
-]
+# one_rules = [
+#     @rule a b b::One * a::Gate --> a
+#     @rule a b a::Gate * b::One --> a
+#     @rule a b b::One * a::Real --> a
+#     @rule a b a::Real * b::One --> a
+# ]
 
+
+one_rules = @theory a b begin 
+    b::One * a::Gate --> a
+    a::Gate * b::One --> a
+    b::One * a::Real --> a
+    a::Real * b::One --> a
+end
 
 
 
 """some rewrite rules"""
 to_dagger_rule = @rule x x::Gate => to_dagger(x)
 Z2HXH_rule = @rule a a::Gate => generate_HXH(a) where is_Z(a)
-X2HZH_rule = @rule a a::Gate => generate_HZH(a) where is_X(a)
-
 HXH2Z_rule = @rule a b c a::Gate * b::Gate * c::Gate => generate_Z(a) where is_HXH(a, b, c)
+
+X2HZH_rule = @rule a a::Gate => generate_HZH(a) where is_X(a)
 HZH2X_rule = @rule a b c a::Gate * b::Gate * c::Gate => generate_X(a) where is_HZH(a, b, c)
 """some rewrite rules end"""
 
+
+"""rules that are equivalent up to a globle phase, may correct it in the future"""
+
+HYH2Y_rule = @rule a b c a::Gate * b::Gate * c::Gate => generate_Y(a) where is_HYH(a, b, c)
+Y2HYH_rule = @rule a a::Gate => generate_HYH(a) where is_Y(a)
+
+XYZ_rule = @rule a b c a::Gate * b::Gate * c::Gate => One() where is_XYZ(a, b, c)
+"""end"""
 
 
 
@@ -58,6 +73,12 @@ function get_full_simplify_rules()
     push!(v, X2HZH_rule)
     push!(v, HXH2Z_rule)
     push!(v, HZH2X_rule)
+
+    push!(v, HYH2Y_rule)
+    push!(v, Y2HYH_rule)
+    # push!(v, XYZ_rule)
+
+
     return v
 end
 # function get_simplify_rules()
@@ -115,18 +136,33 @@ end
 
 # end
 
-block_merge_rules_include_RG = [
-    @rule a b a::Gate * b::Gate => block_merge(a, b) where is_block_merge(a, b; exclude_RG=false)
-    @rule a b a::Block * b::Gate => block_merge(a, b) where is_block_merge(a, b; exclude_RG=false)
-    @rule a b a::Gate * b::Block => block_merge(a, b) where is_block_merge(a, b; exclude_RG=false)
-]
+# block_merge_rules_include_RG = [
+#     @rule a b a::Gate * b::Gate => block_merge(a, b) where is_block_merge(a, b; exclude_RG=false)
+#     @rule a b a::Block * b::Gate => block_merge(a, b) where is_block_merge(a, b; exclude_RG=false)
+#     @rule a b a::Gate * b::Block => block_merge(a, b) where is_block_merge(a, b; exclude_RG=false)
+# ]
+
+block_merge_rules_include_RG = @theory a b begin 
+    a::Gate * b::Gate => block_merge(a, b) where is_block_merge(a, b; exclude_RG=false)
+    a::Block * b::Gate => block_merge(a, b) where is_block_merge(a, b; exclude_RG=false)
+    a::Gate * b::Block => block_merge(a, b) where is_block_merge(a, b; exclude_RG=false)
+end
 
 
-block_merge_rules_exclude_RG = [
-    @rule a b a::Gate * b::Gate => block_merge(a, b) where is_block_merge(a, b; exclude_RG=true)
-    @rule a b a::Block * b::Gate => block_merge(a, b) where is_block_merge(a, b; exclude_RG=true)
-    @rule a b a::Gate * b::Block => block_merge(a, b) where is_block_merge(a, b; exclude_RG=true)
-]
+
+# block_merge_rules_exclude_RG = [
+#     @rule a b a::Gate * b::Gate => block_merge(a, b) where is_block_merge(a, b; exclude_RG=true)
+#     @rule a b a::Block * b::Gate => block_merge(a, b) where is_block_merge(a, b; exclude_RG=true)
+#     @rule a b a::Gate * b::Block => block_merge(a, b) where is_block_merge(a, b; exclude_RG=true)
+# ]
+
+
+block_merge_rules_exclude_RG = @theory a b begin 
+    a::Gate * b::Gate => block_merge(a, b) where is_block_merge(a, b; exclude_RG=true)
+    a::Block * b::Gate => block_merge(a, b) where is_block_merge(a, b; exclude_RG=true)
+    a::Gate * b::Block => block_merge(a, b) where is_block_merge(a, b; exclude_RG=true)
+end
+
 
 block_expand_rule = @rule a a::Block => block_expand2expr(a)
 

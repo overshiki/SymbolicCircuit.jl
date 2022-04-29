@@ -28,7 +28,7 @@ export Circuit, head_circuit, dagger_circuit, show_circuit, show_length, count_g
 include("eqsat.jl")
 export egraph_simplify
 
-include("tensor.jl")
+# include("tensor.jl")
 
 include("yao.jl")
 export to_yao, to_yaoplot

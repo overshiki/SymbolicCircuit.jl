@@ -1,0 +1,5 @@
+include("./test_block.jl")
+include("./test_eqsat.jl")
+include("./test_gate.jl")
+include("./test_readme.jl")
+include("./test_rewrite.jl")

@@ -59,6 +59,12 @@ struct gHd <:UHG end
 struct gTd <:SG end
 struct gSd <:SG end
 
+
+
+
+
+
+
 struct One end
 struct Positive end
 struct Negative end
@@ -564,9 +570,27 @@ function generate_HZH(a::Gate)
     return :($(h) * $(z) * $(h))
 end
 
+function generate_HYH(a::Gate)
+    h = Gate(gH(), a.loc)
+    y = Gate(gY(), a.loc)
+    return :($(h) * $(y) * $(h))
+end
+
 function is_HXH(a::Gate, b::Gate, c::Gate)
     return is_H(a)&&is_X(b)&&is_H(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)
 end
+
+function is_HZH(a::Gate, b::Gate, c::Gate)
+    return is_H(a)&&is_Z(b)&&is_H(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)
+end
+function is_HYH(a::Gate, b::Gate, c::Gate)
+    return is_H(a)&&is_Y(b)&&is_H(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)
+end
+
+function is_XYZ(a::Gate, b::Gate, c::Gate)
+    return is_X(a)&&is_Y(b)&&is_Z(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)
+end
+
 
 function generate_Z(a::Gate)
     z = Gate(gZ(), a.loc)
@@ -574,12 +598,13 @@ function generate_Z(a::Gate)
 end
 
 
-function is_HZH(a::Gate, b::Gate, c::Gate)
-    return is_H(a)&&is_Z(b)&&is_H(c)&&is_loc_identity(a, b)&&is_loc_identity(a, c)
-end
-
 function generate_X(a::Gate)
     x = Gate(gX(), a.loc)
+    return :($x)
+end
+
+function generate_Y(a::Gate)
+    x = Gate(gY(), a.loc)
     return :($x)
 end
 
