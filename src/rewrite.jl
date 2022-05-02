@@ -25,3 +25,9 @@ function x2hzh_rewriter()
     z2hxh = Postwalk(PassThrough(r))
     return z2hxh
 end
+
+
+function block_simplify_rewriter()
+    r = @rule a a::Block => block_simplify2expr(a)
+    return Postwalk(PassThrough(r))
+end

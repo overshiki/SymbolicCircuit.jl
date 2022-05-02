@@ -39,6 +39,17 @@ function is_subset(atom_vec::Vector{T}, larger_atom_vec::Vector{T}) where {T}
 
 end
 
+function is_intersect(indices1::Vector{T}, indices2::Vector{T}) where {T}
+    # return length(get_intersect(vec1, vec2))>0
+    check = false
+    for index in indices1
+        if index in indices2
+            check = true 
+        end 
+    end 
+    return check
+end
+
 function get_intersect(vec1::Vector{T}, vec2::Vector{T}) where {T}
     rvec = T[]
     for v1 in vec1

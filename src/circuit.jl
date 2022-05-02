@@ -31,7 +31,7 @@ function (*)(a::Circuit, b::Union{Gate, Real, One, Block})
     return circuit
 end
 
-function (*)(a::Gate, b::Gate)
+function (*)(a::Gate, b::Union{Gate, Real, One, Block})
     circuit = :((*)())
     push!(circuit.args, a)
     push!(circuit.args, b)
@@ -44,50 +44,48 @@ function head_circuit()
 end
 
 using MacroTools: postwalk
-function get_length(circ::Int)
-    @assert circ==0 
-    return 0
-end
+# function get_length(circ::Int)
+#     @assert circ==0 
+#     return 0
+# end
 
-function get_length(::One)
-    return 0
-end
+# function get_length(::One)
+#     return 0
+# end
 
-function get_length(::Gate)
-    return 1
-end
+# function get_length(::Gate)
+#     return 1
+# end
 
-function get_length(circuit::Circuit)
-    circuit = circuit.expr
-    gates = []
-    postwalk(circuit) do x 
-        if typeof(x)==Gate
-            push!(gates, x)
-        end
-        return x 
-    end
+# function get_length(circuit::Circuit)
+#     circuit = circuit.expr
+#     gates = []
+#     postwalk(circuit) do x 
+#         if typeof(x)==Gate
+#             push!(gates, x)
+#         end
+#         return x 
+#     end
 
-    return length(gates)
-end
+#     return length(gates)
+# end
 
-function show_length(circuit::Circuit)
-    println("length of circuit: ", get_length(circuit))
-end
 
-function get_gates(circuit::Circuit, ::Val{:withblock})
-    gates = get_gates(circuit)
-    ngates = []
-    for g in gates
-        if g isa Gate 
-            push!(ngates, g)
-        elseif g isa Block 
-            push!(ngates, g.gates)
-        else 
-            error()
-        end 
-    end 
-    return ngates
-end
+
+# function get_gates(circuit::Circuit, ::Val{:withblock})
+#     gates = get_gates(circuit)
+#     ngates = []
+#     for g in gates
+#         if g isa Gate 
+#             push!(ngates, g)
+#         elseif g isa Block 
+#             push!(ngates, g.gates)
+#         else 
+#             error()
+#         end 
+#     end 
+#     return ngates
+# end
 
 
 function get_gates(circuit::Circuit)
@@ -117,6 +115,14 @@ function get_gates(circuit::Circuit)
         return x 
     end
     return gates
+end
+
+function get_length(circuit::Circuit)
+    return length(get_gates(circuit))
+end
+
+function show_length(circuit::Circuit)
+    println("length of circuit: ", get_length(circuit))
 end
 
 function show_circuit(circuit::Circuit)

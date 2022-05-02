@@ -164,13 +164,14 @@ end
 function is_loc_intersect(a::Gate, b::Gate)
     indices1 = loc_indices(a)
     indices2 = loc_indices(b)
-    check = false
-    for index in indices1
-        if index in indices2
-            check = true 
-        end 
-    end 
-    return check
+    # check = false
+    # for index in indices1
+    #     if index in indices2
+    #         check = true 
+    #     end 
+    # end 
+    # return check
+    return is_intersect(indices1, indices2)
 end
 
 function is_loc_identity(a::Gate, b::Gate)

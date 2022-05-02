@@ -1,6 +1,6 @@
+abstract type Block end
 
-
-struct Block 
+struct ClauseBlock <: Block
     gates::Vector{Gate}
     indices::Vector{Int64}
 end

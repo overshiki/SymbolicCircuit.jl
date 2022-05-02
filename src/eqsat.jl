@@ -15,7 +15,7 @@ end
 function _simplify(circuit::Circuit, v::Vector{<:AbstractRule}, timeout)
     circuit = circuit.expr
     g = EGraph(circuit)
-    params = SaturationParams(timeout=timeout, eclasslimit=40000, scheduler=BackoffScheduler)
+    params = SaturationParams(timeout=timeout, eclasslimit=400000, scheduler=BackoffScheduler)
     report = saturate!(g, v, params)
     circuit = extract!(g, astsize)
     circuit = Circuit(circuit)
@@ -82,7 +82,8 @@ end
 
 import Metatheory: EGraph, EClassId, AbstractENode, AbstractRule, addexpr!, EqualityGoal, reached
 
-function _areequal(theory::Vector, exprs...; params=SaturationParams())
+function _areequal(theory::Vector, exprs...)
+    params = SaturationParams(timeout=100, eclasslimit=400000, scheduler=BackoffScheduler)
     g = EGraph(exprs[1])
     _areequal(g, theory, exprs...; params=params)
 end
@@ -130,6 +131,24 @@ end
 
 function areequal(::Val{:default_rule}, circs...)
     # exprs = [x.expr for x in circs]
+    # ncirc = Circuit[]
+    # for circ in circs 
+    #     if get_length(circ)==1
+    #         circ *= One()
+    #     end
+    #     push!(ncirc, circ)
+    # end
+
+    # nexprs = [x.expr for x in ncirc]
+    
+    # return _areequal(default_rule, nexprs...)
+
+    return areequal(Val(:withrule), default_rule, circs...)
+end
+
+
+function areequal(::Val{:withrule}, rules, circs...)
+    # exprs = [x.expr for x in circs]
     ncirc = Circuit[]
     for circ in circs 
         if get_length(circ)==1
@@ -139,7 +158,6 @@ function areequal(::Val{:default_rule}, circs...)
     end
 
     nexprs = [x.expr for x in ncirc]
-
-    params = SaturationParams(timeout=100, eclasslimit=400000, scheduler=BackoffScheduler)
-    return _areequal(default_rule, nexprs...; params=params)
+    
+    return _areequal(rules, nexprs...)
 end
