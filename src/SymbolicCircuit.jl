@@ -15,10 +15,12 @@ export Gate, One, Positive, Negative, UGate, DaggerGate
 include("block.jl")
 export Block, ClauseBlock
 # export is_block_merge, block_merge, block_expand
-
+include("parallelBlock.jl")
 
 include("rule.jl")
 export get_simplify_rules, get_block_rules
+
+include("block_simplify.jl")
 
 include("rewrite.jl")
 export z2hxh_rewriter, x2hzh_rewriter, dagger_rewriter
