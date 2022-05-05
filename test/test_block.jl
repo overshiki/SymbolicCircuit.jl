@@ -54,18 +54,18 @@ function test(block, circ, n_qubits)
 end
 
 
-block = Block([x1, z2], [1,2])
+block = ClauseBlock([x1, z2], [1,2])
 circ = x1 * z2
 test(block, circ, 2)
 
-block = Block([x1, h2], [1,2])
+block = ClauseBlock([x1, h2], [1,2])
 circ = x1 * h2
 test(block, circ, 2)
 
-block = Block([y1, x2, z1, h2], [1,2])
+block = ClauseBlock([y1, x2, z1, h2], [1,2])
 circ = y1 * x2 * z1 * h2
 test(block, circ, 2)
 
-block = Block([x1, y3, cnot_1c3], [1,3])
+block = ClauseBlock([x1, y3, cnot_1c3], [1,3])
 circ = x1 * y3 * cnot_1c3
 test(block, circ, 3)

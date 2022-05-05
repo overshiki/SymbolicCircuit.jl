@@ -1,7 +1,7 @@
 name = "SymbolicCircuit"
 uuid = "90f18bad-8de6-4f24-a7ee-bfe158ef45c0"
 authors = ["overshiki <le.niu@hotmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"

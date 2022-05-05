@@ -51,7 +51,7 @@ function block_merge(a::Gate, b::Gate)
     indices = copy(loc_indices(a))
     indices2 = loc_indices(b)
     union!(indices, indices2)
-    bk = Block([a, b], indices)
+    bk = ClauseBlock([a, b], indices)
     return :($(bk))
 end
 
@@ -64,7 +64,7 @@ function block_merge(a::Block, b::Gate)
     gates = copy(a.gates)
     push!(gates, b)
 
-    bk = Block(gates, indices)
+    bk = ClauseBlock(gates, indices)
     return :($(bk))
 end
 
@@ -77,7 +77,7 @@ function block_merge(a::Gate, b::Block)
     gates = [a, ]
     append!(gates, b.gates)
 
-    bk = Block(gates, indices)
+    bk = ClauseBlock(gates, indices)
     return :($(bk))
 end
 

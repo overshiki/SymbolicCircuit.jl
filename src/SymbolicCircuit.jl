@@ -13,7 +13,7 @@ export Gate, One, Positive, Negative, UGate, DaggerGate
 
 
 include("block.jl")
-export Block
+export Block, ClauseBlock
 # export is_block_merge, block_merge, block_expand
 
 
