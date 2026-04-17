@@ -200,6 +200,26 @@ circ = egraph_simplify(circ, Val(:default_rule); verbose=false)
 SymbolicCircuit.areequal(Val(:default_rule), circ1, circ2, circ3)
 ```
 
+#### Test
+To run the test scripts, start a Julia REPL in the project root and execute:
+```julia
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
+
+include("test/test_all.jl")
+```
+Alternatively, you can run individual test files directly:
+```julia
+include("test/test_gate.jl")
+include("test/test_eqsat.jl")
+include("test/test_block.jl")
+include("test/test_rewrite.jl")
+include("test/test_yao.jl")
+include("test/test_parallel_block.jl")
+include("test/test_readme.jl")
+```
+
 #### More information
 For more information, please refer to `test` folder. Issue and PR are welcomed.
 
